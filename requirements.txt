@@ -8,3 +8,4 @@ asyncpg~=0.23.0
 orm-converter>=0.2.0b0
 redis
 requests
+gunicorn
