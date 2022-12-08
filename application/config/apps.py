@@ -2,8 +2,8 @@ from typing import Optional
 
 from aiogram import Dispatcher
 from tortoise import Tortoise
-
-from apps import core, hidden_app, belaz_app, problems
+#app
+from application.apps import core, hidden_app, belaz_app, problems
 
 # Register your apps here
 INSTALLED_APPS = [
