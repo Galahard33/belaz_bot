@@ -1,1 +1,0 @@
-web: gunicorn application.config.web.wsgi

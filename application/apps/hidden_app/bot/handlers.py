@@ -1,3 +1,4 @@
+from os import getenv
 from typing import Union
 
 
@@ -10,24 +11,26 @@ from .keyboards import menu, menu_1, menu_shop, back_keyboard, menu_cd_contest, 
 from ..services import get_element, get_element_contest, get_add_info
 from ...mixins import subscription_check
 
+members = ['member', 'admin', 'creator']
+
 
 def register_handlers(dp: Dispatcher):
     dp.register_message_handler(simple_doc, text=["Коды расчетных"])
     dp.register_message_handler(dk, text=["Календарный график работы"])
     dp.register_message_handler(turizm, text=["Промышленный туризм"])
     dp.register_message_handler(schedule_kpp, text=["График работы проходных"])
-    dp.register_message_handler(general_workshop, text=["Интерактивный телефонный справочник"])
+    dp.register_message_handler(get_belaz_pre, text=["Интерактивный телефонный справочник"])
     dp.register_message_handler(show_med_info, text=["ОЦ Дудинка"])
     dp.register_message_handler(show_schedule_bus, text=['Расписане транспорта'])
     dp.register_message_handler(show_main_menu, commands=["menu"])
     dp.register_message_handler(show_main_menu, text=["Назад"])
-    dp.register_message_handler(hiring, text=["Информация по трудоустройству"])
+    dp.register_message_handler(get_belaz_pre, text=["Информация по трудоустройству"])
     dp.register_message_handler(show_menu, text=["Общезаводская информация"])
     dp.register_message_handler(show_extra_menu, text=["Прочая информация"])
     dp.register_message_handler(show_extra_menu, text=["В предыдущий раздел"])
     dp.register_message_handler(contest_info, text=["Информация о конкурсах"])
     dp.register_message_handler(get_prof, text=["Профсоюз"])
-    dp.register_message_handler(get_bonus, text=["Корпоративные бонусы"])
+    dp.register_message_handler(get_belaz_pre, text=["Корпоративные бонусы"])
     dp.register_message_handler(get_com_org, text=["Общественные организации"])
     dp.register_message_handler(get_other_info, text=["В предыдущее меню"])
     dp.register_message_handler(get_belaz_info, commands=["menu_belaz"])
@@ -41,6 +44,11 @@ def register_handlers(dp: Dispatcher):
 @subscription_check
 async def get_belaz_info(message: Message, **kwargs):
     await message.answer('Общезаводская информация', reply_markup=menu_1)
+
+
+@subscription_check
+async def get_belaz_pre(message: Message, **kwargs):
+    await message.answer('Данный раздел в разработке и скоро будет доступен')
 
 
 async def hiring(message: Message, **kwargs):
@@ -59,22 +67,24 @@ async def get_com_org(message: Message, **kwargs):
 
 @subscription_check
 async def simple_doc(message: Message, **kwargs):
+    list_admin = getenv("admins").split(',')
     await message.answer_document(document='BQACAgIAAxkBAAICkmOEmBUL_LpcAiGI91rgziAAAcLgEwACZyEAAi9bKUhsyUVmFJoeBSsE')
 
 
 @subscription_check
 async def get_document(message: Message, **kwargs):
-    if message.from_user.id == 425007240:
+    list_admin = getenv("admins").split(',')
+    if str(message.from_user.id) in list_admin:
         file_id = message.document.file_id
         await message.answer(text=file_id)
 
 
 @subscription_check
 async def get_photo(message: Message, **kwargs):
-    if message.from_user.id == 425007240:
+    list_admin = getenv("admins").split(',')
+    if str(message.from_user.id) in list_admin:
         photo = message.photo[-1].file_id
         await message.answer(text=photo)
-
 
 
 @subscription_check
@@ -133,18 +143,14 @@ async def turizm(message: Message, **kwargs):
                                 'Сегодня мы рады предложить вам следующие услуги:\n'
                                 'Экскурсия по заводу\n'
                                 'Динамический тренажер\n'
-                                'Проезда на самосвале\n'
+                                'Проезд на самосвале\n'
                                 'Вкусные обеды\n\n'
                                 'Для более подробной информации посетите наш '
                                 +hlink('сайт','https://shop.belaz.by/'), parse_mode=ParseMode.HTML)
 
 
-members = ['member', 'admin', 'creator']
-
-
 async def general_workshop(message: Union[CallbackQuery, Message], **kwargs):
     a = await message.bot.get_chat_member(chat_id='-1001608043243', user_id=message.from_user.id)
-    print(message.from_user.first_name)
     print(a['status'])
     markup=await menu_shop()
     if isinstance(message, Message):
@@ -155,7 +161,6 @@ async def general_workshop(message: Union[CallbackQuery, Message], **kwargs):
 
 
 async def item_text(callback: CallbackQuery, item_id, text, **kwargs):
-    print('из 1 '+str(item_id))
     if item_id == 9999:
         await callback.message.delete()
     elif item_id == 27:
@@ -171,14 +176,12 @@ async def item_text(callback: CallbackQuery, item_id, text, **kwargs):
 
 
 async def item_text2(callback: CallbackQuery, item_id, text, **kwargs):
-    print('из 3 ' + str(item_id))
     text = text
     markup = back_keyboard2(item_id)
     await callback.message.edit_text(text=text, reply_markup=markup, parse_mode=ParseMode.HTML)
 
 
 async def item_location(callback: CallbackQuery, item_id, **kwargs):
-    print('из 2 '+str(item_id))
     item = await get_element(item_id)
     markup = back_keyboard()
     if item.title == '460.01 - Склад электрооборудования':

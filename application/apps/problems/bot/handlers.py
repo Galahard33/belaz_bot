@@ -7,13 +7,14 @@ from aiogram.types import Message, ContentType, CallbackQuery, ParseMode
 from .keyboards import menu_problem, back_keyboard, menu_prob, menu
 from ..services import get_info, add_problems, get_item
 from .states import Problems
+from ...hidden_app.bot.handlers import get_belaz_pre
 from ...mixins import subscription_check
 
 
 def register_handlers(dp: Dispatcher):
 
-    dp.register_message_handler(menu_problems, text=['Сообщить о проблеме'])
-    dp.register_message_handler(menu_problems, commands=['problem_menu'])
+    dp.register_message_handler(get_belaz_pre, text=['Сообщить о проблеме'])
+    dp.register_message_handler(get_belaz_pre, commands=['problem_menu'])
     dp.register_message_handler(create_problems, text=['Сообщить'])
     #dp.register_message_handler(create_problems, state=Problems.Subdivision)
     dp.register_message_handler(create_name, state=Problems.Name)
@@ -91,7 +92,6 @@ async def menu_probl(message: Union[CallbackQuery, Message], **kwargs):
 
 
 async def problem_info(callback: CallbackQuery, item_id, **kwargs):
-    print(item_id)
     if item_id == 9999:
         await callback.message.delete()
     else:
